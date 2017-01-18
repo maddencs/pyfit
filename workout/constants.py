@@ -13,8 +13,13 @@ USER_TYPES = (
     ('ADMIN', 'Administrator'),
 )
 
-WORKOUT_TYPES = (
+EXERCISE_TYPES = (
     ('RESISTANCE', 'Resistance'),
     ('CARDIO', 'Cardio'),
     ('SPORT', 'Sport'),
+)
+
+EXERCISES = (  # TODO: Expand this
+    ('BENCH_PRESS', 'Bench Press'),
+    ('OVERHEAD_PRESS', 'Overhead Press'),
 )

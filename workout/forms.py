@@ -1,8 +1,14 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.postgres.forms import SimpleArrayField
 
 from .constants import DAYS_OF_WEEK
+
+
+def clean_cleaned_data(data):
+    """For removing empty fields from cleaned data"""
+    return {k: v for k, v in data.items() if v is not ''}
 
 
 class RegistrationForm(forms.Form):
@@ -75,17 +81,29 @@ class LoginForm(AuthenticationForm):
     )
 
 
-class BaseRoutineForm(forms.Form):
+class RoutineForm(forms.Form):
     day = forms.ChoiceField(choices=DAYS_OF_WEEK, required=False)
     name = forms.CharField(max_length=250, required=False)
 
+    def clean(self):
+        data = super(RoutineForm, self).clean()
+        return clean_cleaned_data(data)
 
-class AddRoutineForm(BaseRoutineForm):
-    pass
-
-
-class EditRoutineForm(BaseRoutineForm):
-    def save(self, routine):
+    def update(self, routine):
         routine.update(**self.cleaned_data)
         return True
 
+
+class ExerciseForm(forms.Form):
+    sets = SimpleArrayField(forms.IntegerField(), required=False)
+    rest_duration = forms.IntegerField(initial=60, required=False)
+    exercise_name = forms.CharField(max_length=250, required=False)
+    exercise_type = forms.CharField(max_length=250, required=False)
+
+    def clean(self):
+        data = super(ExerciseForm, self).clean()
+        return clean_cleaned_data(data)
+
+    def update(self, exercise):
+        exercise.update(**self.cleaned_data)
+        return True

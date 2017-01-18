@@ -36,8 +36,8 @@ class Migration(migrations.Migration):
             name='Workout',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('workout_type', models.CharField(choices=[('RESISTANCE', 'Resistance'), ('CARDIO', 'Cardio'), ('SPORT', 'Sport')], default='RESISTANCE', max_length=30)),
-                ('workout_name', models.CharField(default='Custom Workout', max_length=250)),
+                ('exercise_type', models.CharField(choices=[('RESISTANCE', 'Resistance'), ('CARDIO', 'Cardio'), ('SPORT', 'Sport')], default='RESISTANCE', max_length=30)),
+                ('exercise_name', models.CharField(default='Custom Workout', max_length=250)),
                 ('routine', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='workout.Routine')),
             ],
         ),

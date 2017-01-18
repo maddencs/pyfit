@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 
-from workout.models import UserProfile, Routine, Workout
+from workout.models import UserProfile, Routine, Exercise
 
 from .test_utils import *
 
@@ -61,3 +61,33 @@ class TestRoutines(TestCase):
                 'day': 'THURSDAY'
             }
         )
+
+
+class TestExercises(TestCase):
+    def setUp(self):
+        self.client = Client()
+        create_test_user()
+
+    def test_create_exercise(self):
+        routine = Routine.objects.create()
+        res = self.client.post('/routine/{}/add-exercise/'.format(routine.id), data={
+            'sets': '5, 5, 5, 5',
+            'exercise_type': 'RESISTANCE',
+            'exercise_name': 'BENCH_PRESS',
+            'rest_duration': 120
+        })
+        routine.refresh_from_db()
+        self.assertEqual(routine.exercises.count(), 1)
+        exercise = Exercise.objects.get(pk=res.json()['exercise_id'])
+        self.assertEqual(len(exercise.sets), 4)
+        self.assertEqual(exercise.get_exercise_name_display(), 'Bench Press')
+
+    def test_edit_exercise(self):
+        exercise = Exercise.objects.create()
+        res = self.client.post('/exercise/{}/edit/'.format(exercise.id), data={
+            'sets': '8, 8, 8',
+            'rest_duration': 90,
+        }, follow=True)
+        exercise.refresh_from_db()
+        self.assertEqual(len(exercise.sets), 3)
+        self.assertEqual(exercise.exercise_name, 'Custom Exercise')

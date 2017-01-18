@@ -1,10 +1,11 @@
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-from .constants import DAYS_OF_WEEK, USER_TYPES, WORKOUT_TYPES
+from .constants import DAYS_OF_WEEK, USER_TYPES, EXERCISE_TYPES, EXERCISES
 
 
 @receiver(post_save, sender=User)
@@ -30,11 +31,8 @@ class UserProfile(models.Model, ModelMixin):
     def __unicode__(self):
         return '{0} -- {1}'.format(self.user.get_full_name(), self.user_type)
 
-    def add_routine(self, name, day):
-        return self.routines.create(
-            name=name,
-            day=day,
-        )
+    def add_routine(self, **kwargs):
+        return self.routines.create(**kwargs)
 
 
 class Routine(models.Model, ModelMixin):
@@ -48,11 +46,16 @@ class Routine(models.Model, ModelMixin):
     def __unicode__(self):
         return 'Routine: {0} -- ID: {1}'.format(self.name, self.id)
 
+    def add_exercise(self, **kwargs):
+        return self.exercises.create(**kwargs)
 
-class Workout(models.Model, ModelMixin):
-    routine = models.ForeignKey(Routine, on_delete=models.CASCADE, related_name='workouts', blank=True, null=True)
-    workout_type = models.CharField(max_length=30, choices=WORKOUT_TYPES, default='RESISTANCE')
-    workout_name = models.CharField(max_length=250, default='Custom Workout')
+
+class Exercise(models.Model, ModelMixin):
+    routine = models.ForeignKey(Routine, on_delete=models.CASCADE, related_name='exercises', blank=True, null=True)
+    exercise_type = models.CharField(max_length=30, choices=EXERCISE_TYPES, default='RESISTANCE')
+    exercise_name = models.CharField(max_length=250, choices=EXERCISES, default='Custom Exercise')
+    sets = ArrayField(models.IntegerField(default=10), size=10, default=list())
+    rest_duration = models.IntegerField(default=60)  # Time represented in seconds
 
     def __str__(self):
-        return '{0} -- {1}'.format(self.get_workout_type_display(), self.workout_name)
+        return '{0} -- {1}'.format(self.get_exercise_type_display(), self.exercise_name)

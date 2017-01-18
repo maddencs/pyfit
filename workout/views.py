@@ -9,8 +9,8 @@ from django.views.generic.edit import FormView, View
 
 from rest_framework.views import APIView
 
-from .forms import RegistrationForm, LoginForm, AddRoutineForm, EditRoutineForm
-from .models import Routine
+from .forms import RegistrationForm, LoginForm, RoutineForm, ExerciseForm
+from .models import Routine, Exercise
 
 
 class SignupView(FormView):
@@ -42,13 +42,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
 
 class AddRoutineView(FormView):
-    form_class = AddRoutineForm
+    form_class = RoutineForm
 
     def form_valid(self, form):
         routine = self.request.user.userprofile.add_routine(**form.cleaned_data)
         return JsonResponse({
             'success': True,
-            'id': routine.id,
+            'routine_id': routine.id,
         })
 
     def form_invalid(self, form):
@@ -73,12 +73,12 @@ class DeleteRoutineView(View):
 
 
 class EditRoutineView(FormView):
-    form_class = EditRoutineForm
+    form_class = RoutineForm
 
     def form_valid(self, form):
         try:
             routine = Routine.objects.get(pk=self.kwargs['routine_id'])
-            form.save(routine)
+            form.update(routine)
             return JsonResponse({
                 'success': True
             })
@@ -87,3 +87,50 @@ class EditRoutineView(FormView):
                 'success': False,
                 'reason': 'ROUTINE_DNE'  # Routine matching primary key does not exist
             })
+
+    def form_invalid(self, form):
+        return JsonResponse({
+            'success': False,
+            'reason': form.errors,
+        })
+
+
+class AddExerciseView(FormView):
+    form_class = ExerciseForm
+
+    def form_valid(self, form):
+        try:
+            routine = Routine.objects.get(pk=self.kwargs['routine_id'])
+            exercise = routine.add_exercise(**form.cleaned_data)
+            return JsonResponse({
+                'success': True,
+                'exercise_id': exercise.id,
+            })
+        except exceptions.ObjectDoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'reason': 'ROUTINE_DNE'
+            })
+
+    def form_invalid(self, form):
+        return JsonResponse({
+            'success': False,
+            'reason': form.errors,
+        })
+
+
+class EditExerciseView(FormView):
+    form_class = ExerciseForm
+
+    def form_valid(self, form):
+        exercise = Exercise.objects.get(pk=self.kwargs['exercise_id'])
+        form.update(exercise)
+        return JsonResponse({
+            'success': True,
+        })
+
+    def form_invalid(self, form):
+        return JsonResponse({
+            'success': False,
+            'reason': form.errors,
+        })

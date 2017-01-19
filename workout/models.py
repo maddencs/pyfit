@@ -1,9 +1,9 @@
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
+from django.utils import timezone
 
 from .constants import DAYS_OF_WEEK, USER_TYPES, EXERCISE_TYPES, EXERCISES
 
@@ -59,3 +59,26 @@ class Exercise(models.Model, ModelMixin):
 
     def __str__(self):
         return '{0} -- {1}'.format(self.get_exercise_type_display(), self.exercise_name)
+
+    def add_history(self, **kwargs):
+        if not kwargs.get('sets', None):
+            kwargs['sets'] = self.sets
+        return self.history.create(**kwargs)
+
+
+class ExerciseHistory(models.Model, ModelMixin):
+    exercise = models.ForeignKey(Exercise, related_name='history')
+    timestamp = models.DateTimeField(default=timezone.now)
+    sets = ArrayField(models.IntegerField(default=10), size=10, default=list())
+    weights_per_set = ArrayField(models.IntegerField(default=10), size=10, default=list())
+    notes = models.TextField()
+
+    def json(self):
+        return {
+            'sets': list(map(lambda x: {
+                'reps': x[0],
+                'weight': x[1],
+            }, tuple(zip(self.sets, self.weights_per_set))))
+        }
+
+

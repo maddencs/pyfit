@@ -11,6 +11,16 @@ def clean_cleaned_data(data):
     return {k: v for k, v in data.items() if v is not ''}
 
 
+class CustomModelForm(forms.Form):
+    def clean(self):
+        data = super(CustomModelForm, self).clean()
+        return clean_cleaned_data(data)
+
+    def update(self, instance):
+        instance.update(**self.cleaned_data)
+        return True
+
+
 class RegistrationForm(forms.Form):
     username = forms.EmailField(max_length=250)
     first_name = forms.CharField(max_length=250)
@@ -81,29 +91,18 @@ class LoginForm(AuthenticationForm):
     )
 
 
-class RoutineForm(forms.Form):
+class RoutineForm(CustomModelForm):
     day = forms.ChoiceField(choices=DAYS_OF_WEEK, required=False)
     name = forms.CharField(max_length=250, required=False)
 
-    def clean(self):
-        data = super(RoutineForm, self).clean()
-        return clean_cleaned_data(data)
 
-    def update(self, routine):
-        routine.update(**self.cleaned_data)
-        return True
-
-
-class ExerciseForm(forms.Form):
+class ExerciseForm(CustomModelForm):
     sets = SimpleArrayField(forms.IntegerField(), required=False)
     rest_duration = forms.IntegerField(initial=60, required=False)
     exercise_name = forms.CharField(max_length=250, required=False)
     exercise_type = forms.CharField(max_length=250, required=False)
 
-    def clean(self):
-        data = super(ExerciseForm, self).clean()
-        return clean_cleaned_data(data)
 
-    def update(self, exercise):
-        exercise.update(**self.cleaned_data)
-        return True
+class ExerciseHistoryForm(CustomModelForm):
+    sets = SimpleArrayField(forms.IntegerField(), required=False)
+    weights_per_set = SimpleArrayField(forms.IntegerField(), required=False)

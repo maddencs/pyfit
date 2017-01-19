@@ -3,13 +3,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView, View
 
-from rest_framework.views import APIView
-
-from .forms import RegistrationForm, LoginForm, RoutineForm, ExerciseForm
+from .forms import (RegistrationForm,
+                    LoginForm,
+                    RoutineForm,
+                    ExerciseForm,
+                    ExerciseHistoryForm,
+                    )
 from .models import Routine, Exercise
 
 
@@ -127,6 +129,24 @@ class EditExerciseView(FormView):
         form.update(exercise)
         return JsonResponse({
             'success': True,
+        })
+
+    def form_invalid(self, form):
+        return JsonResponse({
+            'success': False,
+            'reason': form.errors,
+        })
+
+
+class AddExerciseHistoryView(FormView):
+    form_class = ExerciseHistoryForm
+
+    def form_valid(self, form):
+        exercise = Exercise.objects.get(pk=self.kwargs['exercise_id'])
+        history = exercise.add_history(**form.cleaned_data)
+        return JsonResponse({
+            'success': True,
+            'history_id': history.id,
         })
 
     def form_invalid(self, form):

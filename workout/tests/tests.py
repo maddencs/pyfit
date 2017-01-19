@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 
-from workout.models import UserProfile, Routine, Exercise
+from workout.models import UserProfile, Routine, Exercise, ExerciseHistory
 
 from .test_utils import *
 
@@ -91,3 +91,29 @@ class TestExercises(TestCase):
         exercise.refresh_from_db()
         self.assertEqual(len(exercise.sets), 3)
         self.assertEqual(exercise.exercise_name, 'Custom Exercise')
+
+    def test_add_exercise_history(self):
+        exercise = Exercise.objects.create()
+        res = self.client.post('/exercise/{}/add-history/'.format(exercise.id), data={
+            'sets': '9, 10, 11',
+            'weights_per_set': '180, 180, 175',
+        })
+        exercise.refresh_from_db()
+        self.assertEqual(1, exercise.history.count())
+        history = ExerciseHistory.objects.first()
+        import pdb; pdb.set_trace()
+        self.assertEqual([
+            {
+                'reps': 9,
+                'weight': 180,
+            },
+            {
+                'reps': 10,
+                'weight': 180,
+            },
+            {
+                'reps': 11,
+                'weight': 175,
+            },
+        ],
+            history.json()['sets'])

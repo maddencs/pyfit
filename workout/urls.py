@@ -4,7 +4,7 @@ from django.contrib import admin
 from workout import views as workout_views
 
 urlpatterns = [
-    url(r'^/$', workout_views.DashboardView.as_view()),
+    url(r'^$', workout_views.DashboardView.as_view()),
     url(r'^login/$', workout_views.LoginView.as_view(), name='login'),
     url(r'^signup/$', workout_views.SignupView.as_view(), name='signup'),
     url(r'^dashboard/$', workout_views.DashboardView.as_view(), name='dashboard'),
@@ -14,4 +14,6 @@ urlpatterns = [
     url(r'^routine/(?P<routine_id>[0-9]+)/add-exercise/$', workout_views.AddExerciseView.as_view(),
         name='add_exercise'),
     url(r'^exercise/(?P<exercise_id>[0-9]+)/edit/$', workout_views.EditExerciseView.as_view(), name='edit_exercise'),
+    url(r'^exercise/(?P<exercise_id>[0-9]+)/add-history/$', workout_views.AddExerciseHistoryView.as_view(),
+        name='add_exercise_history'),
 ]

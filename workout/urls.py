@@ -20,4 +20,6 @@ urlpatterns = [
         name='edit_exercise_history'),
     url(r'^delete-exercise-history/(?P<history_id>[0-9]+)/$', workout_views.DeleteExerciseHistoryView.as_view(),
         name='delete_exercise_history'),
+    url(r'^exercise-history/(?P<exercise_id>[0-9]+)/$', workout_views.GetExerciseHistoryView.as_view(),
+        name='exercise_history'),
 ]

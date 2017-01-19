@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -64,6 +65,22 @@ class Exercise(models.Model, ModelMixin):
         if not kwargs.get('sets', None):
             kwargs['sets'] = self.sets
         return self.history.create(**kwargs)
+
+    def get_history_by_day(self, date=timezone.now()):
+        """
+        Get a list of ExerciseHistory objects for the date provided
+
+        :param datetime.datetime date: Day of history to filter by
+        :return list(ExerciseHistory):
+        """
+        return self.history.filter(timestamp__year=date.year, timestamp__day=date.day)
+
+    def get_history_by_date_range(self,
+                                  start_date=timezone.now() - datetime.timedelta(days=7),
+                                  end_date=timezone.now()):
+        start_date = start_date.replace(hour=0, minute=0)
+        end_date = end_date.replace(hour=23, minute=59)
+        return self.history.filter(timestamp__gte=start_date, timestamp__lte=end_date)
 
 
 class ExerciseHistory(models.Model, ModelMixin):

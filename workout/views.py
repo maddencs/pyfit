@@ -1,8 +1,10 @@
+import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView, View
 
@@ -186,4 +188,41 @@ class DeleteExerciseHistoryView(View):
                 'success': False,
                 'reason': 'HISTORY_DNE'  # History matching primary key does not exist
             })
+
+
+class GetExerciseHistoryView(TemplateView):
+    template_name = 'workout/exercise-history-report-base.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        exercise = Exercise.objects.get(pk=kwargs['exercise_id'])
+        if request.is_ajax():
+            history = self.get_history(exercise, request.GET, kwargs)
+            history = [x.json() for x in history]
+            return JsonResponse({
+                'success': True,
+                'history': history,
+            })
+        return super(GetExerciseHistoryView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        exercise = Exercise.objects.get(pk=kwargs['exercise_id'])
+        kwargs['history'] = self.get_history(exercise, self.request.GET, kwargs).all()
+        return super(GetExerciseHistoryView, self).get_context_data(**kwargs)
+
+    @staticmethod
+    def get_history(exercise, data, kwargs):
+        report_type = data.get('report_type', 'date_range')
+        if report_type == 'date_range':
+            kwargs['date_range_history'] = True
+            start_date_str = data.get('start_date', (timezone.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))
+            end_date_str = data.get('end_date', timezone.now().strftime('%Y-%m-%d'))
+            start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+            history = exercise.get_history_by_date_range(start_date, end_date)
+        else:
+            kwargs['date_range_history'] = False
+            date = datetime.datetime.strptime(data.get('date'), '%Y-%m-%d')
+            history = exercise.get_history_by_day(date)
+        return history
+
 

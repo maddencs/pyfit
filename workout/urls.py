@@ -16,4 +16,8 @@ urlpatterns = [
     url(r'^exercise/(?P<exercise_id>[0-9]+)/edit/$', workout_views.EditExerciseView.as_view(), name='edit_exercise'),
     url(r'^exercise/(?P<exercise_id>[0-9]+)/add-history/$', workout_views.AddExerciseHistoryView.as_view(),
         name='add_exercise_history'),
+    url(r'^edit-exercise-history/(?P<history_id>[0-9]+)/$', workout_views.EditExerciseHistoryView.as_view(),
+        name='edit_exercise_history'),
+    url(r'^delete-exercise-history/(?P<history_id>[0-9]+)/$', workout_views.DeleteExerciseHistoryView.as_view(),
+        name='delete_exercise_history'),
 ]

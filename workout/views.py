@@ -12,7 +12,7 @@ from .forms import (RegistrationForm,
                     ExerciseForm,
                     ExerciseHistoryForm,
                     )
-from .models import Routine, Exercise
+from .models import Routine, Exercise, ExerciseHistory
 
 
 class SignupView(FormView):
@@ -154,3 +154,36 @@ class AddExerciseHistoryView(FormView):
             'success': False,
             'reason': form.errors,
         })
+
+
+class EditExerciseHistoryView(FormView):
+    form_class = ExerciseHistoryForm
+
+    def form_valid(self, form):
+        history = ExerciseHistory.objects.get(pk=self.kwargs['history_id'])
+        form.update(history)
+        return JsonResponse({
+            'success': True,
+            'history_id': history.id,
+        })
+
+    def form_invalid(self, form):
+        return JsonResponse({
+            'success': False,
+            'reason': form.errors,
+        })
+
+
+class DeleteExerciseHistoryView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            ExerciseHistory.objects.get(pk=kwargs['history_id']).delete()
+            return JsonResponse({
+                'success': True,
+            })
+        except exceptions.ObjectDoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'reason': 'HISTORY_DNE'  # History matching primary key does not exist
+            })
+

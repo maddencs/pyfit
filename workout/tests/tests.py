@@ -101,7 +101,6 @@ class TestExercises(TestCase):
         exercise.refresh_from_db()
         self.assertEqual(1, exercise.history.count())
         history = ExerciseHistory.objects.first()
-        import pdb; pdb.set_trace()
         self.assertEqual([
             {
                 'reps': 9,
@@ -117,3 +116,21 @@ class TestExercises(TestCase):
             },
         ],
             history.json()['sets'])
+
+    def test_edit_exercise_history(self):
+        exercise = Exercise.objects.create(sets=[20])
+        history = exercise.add_history()
+        self.assertEqual(history.sets, [20])
+        res = self.client.post('/edit-exercise-history/{}/'.format(history.id), data={
+            'sets': '20, 20, 15',
+            'weights_per_set': '15, 15, 15'
+        })
+        history.refresh_from_db()
+        self.assertEqual(history.sets, [20, 20, 15])
+        self.assertEqual(history.weights_per_set, [15, 15, 15])
+
+    def test_delete_exercise_history(self):
+        exercise = Exercise.objects.create()
+        history = exercise.add_history()
+        res = self.client.post('/delete-exercise-history/{}/'.format(history.id))
+        self.assertEqual(ExerciseHistory.objects.count(), 0)

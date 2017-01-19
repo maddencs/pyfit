@@ -9,10 +9,12 @@ urlpatterns = [
     url(r'^signup/$', workout_views.SignupView.as_view(), name='signup'),
     url(r'^dashboard/$', workout_views.DashboardView.as_view(), name='dashboard'),
     url(r'^add-routine/$', workout_views.AddRoutineView.as_view(), name='add_routine'),
+    url(r'^routine/(?P<routine_id>[0-9]+)/$', workout_views.RoutineDetailView.as_view(), name='routine_detail'),
     url(r'^delete-routine/(?P<routine_id>[0-9]+)/$', workout_views.DeleteRoutineView.as_view(), name='delete_routine'),
     url(r'^edit-routine/(?P<routine_id>[0-9]+)/$', workout_views.EditRoutineView.as_view(), name='edit_routine'),
     url(r'^routine/(?P<routine_id>[0-9]+)/add-exercise/$', workout_views.AddExerciseView.as_view(),
         name='add_exercise'),
+    url(r'^exercise/(?P<exercise_id>[0-9]+)/$', workout_views.ExerciseDetailView.as_view(), name='exercise_detail'),
     url(r'^exercise/(?P<exercise_id>[0-9]+)/edit/$', workout_views.EditExerciseView.as_view(), name='edit_exercise'),
     url(r'^exercise/(?P<exercise_id>[0-9]+)/add-history/$', workout_views.AddExerciseHistoryView.as_view(),
         name='add_exercise_history'),
@@ -20,6 +22,8 @@ urlpatterns = [
         name='edit_exercise_history'),
     url(r'^delete-exercise-history/(?P<history_id>[0-9]+)/$', workout_views.DeleteExerciseHistoryView.as_view(),
         name='delete_exercise_history'),
-    url(r'^exercise-history/(?P<exercise_id>[0-9]+)/$', workout_views.GetExerciseHistoryView.as_view(),
-        name='exercise_history'),
+    url(r'^exercise-history-list/(?P<exercise_id>[0-9]+)/$', workout_views.ExerciseHistoryListView.as_view(),
+        name='exercise_history_list'),
+    url(r'^exercise-history/(?P<history_id>[0-9]+)/$', workout_views.ExerciseHistoryDetailView.as_view(),
+        name='exercise_history_detail')
 ]

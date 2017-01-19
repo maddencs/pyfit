@@ -92,6 +92,7 @@ class ExerciseHistory(models.Model, ModelMixin):
 
     def json(self):
         return {
+            'id': self.id,
             'sets': list(map(lambda x: {
                 'reps': x[0],
                 'weight': x[1],

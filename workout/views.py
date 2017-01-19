@@ -62,6 +62,14 @@ class AddRoutineView(FormView):
         })
 
 
+class RoutineDetailView(TemplateView):
+    template_name = 'workout/routine-detail.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
+        return super(RoutineDetailView, self).get_context_data(**kwargs)
+
+
 class DeleteRoutineView(View):
     def post(self, request, *args, **kwargs):
         try:
@@ -101,15 +109,26 @@ class EditRoutineView(FormView):
 
 class AddExerciseView(FormView):
     form_class = ExerciseForm
+    template_name = 'workout/add-exercise.html'
+
+    def get_success_url(self):
+        return reverse_lazy('exercise_detail', kwargs={'exercise_id': self.kwargs['exercise'].id})
+
+    def get_context_data(self, **kwargs):
+        kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
+        return super(AddExerciseView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
         try:
-            routine = Routine.objects.get(pk=self.kwargs['routine_id'])
-            exercise = routine.add_exercise(**form.cleaned_data)
-            return JsonResponse({
-                'success': True,
-                'exercise_id': exercise.id,
-            })
+            exercise = Routine.objects.get(pk=self.kwargs['routine_id']).add_exercise(**form.cleaned_data)
+            if self.request.is_ajax():
+                return JsonResponse({
+                    'success': True,
+                    'exercise_id': exercise.id,
+                })
+            else:
+                self.kwargs['exercise'] = exercise
+                return super(AddExerciseView, self).form_valid(form)
         except exceptions.ObjectDoesNotExist:
             return JsonResponse({
                 'success': False,
@@ -121,6 +140,10 @@ class AddExerciseView(FormView):
             'success': False,
             'reason': form.errors,
         })
+
+
+class ExerciseDetailView(TemplateView):
+    template_name = 'workout/exercise-detail.html'
 
 
 class EditExerciseView(FormView):
@@ -142,20 +165,31 @@ class EditExerciseView(FormView):
 
 class AddExerciseHistoryView(FormView):
     form_class = ExerciseHistoryForm
+    template_name = 'workout/history/add-exercise-history.html'
+
+    def get_success_url(self):
+        return reverse_lazy('exercise_history_detail', kwargs={'history_id': self.kwargs['history'].id})
 
     def form_valid(self, form):
         exercise = Exercise.objects.get(pk=self.kwargs['exercise_id'])
         history = exercise.add_history(**form.cleaned_data)
-        return JsonResponse({
-            'success': True,
-            'history_id': history.id,
-        })
+        if self.request.is_ajax():
+            return JsonResponse({
+                'success': True,
+                'history_id': history.id,
+            })
+        else:
+            self.kwargs['history'] = history
+            return super(AddExerciseHistoryView, self).form_valid(form)
 
     def form_invalid(self, form):
-        return JsonResponse({
-            'success': False,
-            'reason': form.errors,
-        })
+        if self.request.is_ajax():
+            return JsonResponse({
+                'success': False,
+                'reason': form.errors,
+            })
+        else:
+            return super(AddExerciseHistoryView, self).form_invalid(form)
 
 
 class EditExerciseHistoryView(FormView):
@@ -190,8 +224,8 @@ class DeleteExerciseHistoryView(View):
             })
 
 
-class GetExerciseHistoryView(TemplateView):
-    template_name = 'workout/exercise-history-report-base.html'
+class ExerciseHistoryListView(TemplateView):
+    template_name = 'workout/history/exercise-history-report-base.html'
 
     def dispatch(self, request, *args, **kwargs):
         exercise = Exercise.objects.get(pk=kwargs['exercise_id'])
@@ -202,12 +236,12 @@ class GetExerciseHistoryView(TemplateView):
                 'success': True,
                 'history': history,
             })
-        return super(GetExerciseHistoryView, self).dispatch(request, *args, **kwargs)
+        return super(ExerciseHistoryListView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         exercise = Exercise.objects.get(pk=kwargs['exercise_id'])
         kwargs['history'] = self.get_history(exercise, self.request.GET, kwargs).all()
-        return super(GetExerciseHistoryView, self).get_context_data(**kwargs)
+        return super(ExerciseHistoryListView, self).get_context_data(**kwargs)
 
     @staticmethod
     def get_history(exercise, data, kwargs):
@@ -225,4 +259,20 @@ class GetExerciseHistoryView(TemplateView):
             history = exercise.get_history_by_day(date)
         return history
 
+
+class ExerciseHistoryDetailView(TemplateView):
+    template_name = 'workout/history/exercise-history-detail.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.is_ajax():
+            history = ExerciseHistory.objects.get(pk=kwargs['history_id'])
+            return JsonResponse({
+                'success': True,
+                'history': history.json(),
+            })
+        return super(ExerciseHistoryDetailView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        kwargs['history'] = ExerciseHistory.objects.get(pk=kwargs['history_id'])
+        return super(ExerciseHistoryDetailView, self).get_context_data(**kwargs)
 

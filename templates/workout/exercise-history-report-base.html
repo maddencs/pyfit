@@ -1,9 +1,0 @@
-{% extends 'base.html' %}
-
-{% block main_content %}
-    {% if date_range_history %}
-        {% include 'workout/exercise-history-date-range.html' %}
-    {% else %}
-        {% include 'workout/exercise-history-day.html' %}
-    {% endif %}
-{% endblock %}

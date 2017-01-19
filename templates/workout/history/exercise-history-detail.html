@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+    <div class="history-wrapper">
+        <div id="exercise-title">
+            <h3>{{ history.exercise.exercise_name }}</h3>
+        </div>
+    {% with history.json as history_json %}
+        <div id="set-details-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <td class="exercise-history-column-header">Reps</td>
+                        <td class="exercise-history-column-header">Weight(lbs)</td>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for set in history_json.sets %}
+                    <tr>
+                        <td>{{ set.reps }}</td>
+                        <td>{{ set.weight }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endwith %}
+    </div>
+{% endblock %}
+

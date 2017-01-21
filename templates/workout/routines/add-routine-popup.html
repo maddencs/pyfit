@@ -1,0 +1,7 @@
+<div id="add-routine-popup">
+    <form id="add-routine-form">
+        {% csrf_token %}
+        {{ add_routine_form.as_p }}
+        <input type="submit">
+    </form>
+</div>

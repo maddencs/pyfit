@@ -36,7 +36,7 @@ class TestAccounts(TestCase, TestMixin):
 class TestRoutines(TestCase, TestMixin):
     def setUp(self):
         self.client = Client()
-        create_user()
+        self.user = create_user()
 
     def test_create_routine(self):
         login_user(self.client)
@@ -46,16 +46,28 @@ class TestRoutines(TestCase, TestMixin):
         self.assertEqual(routine.name, 'Test Routine #1')
         self.assertEqual(routine.get_day_display(), 'Tuesday')
 
+    def test_routine_list(self):
+        login_user(self.client)
+        routine_list = [{'name': 'Pull', 'day': 'MONDAY'},
+                        {'name': 'Push', 'day': 'TUESDAY'},
+                        {'name': 'Legs', 'day': 'WEDNESDAY'}]
+        for routine in routine_list:
+            self.user.user_profile.routines.create(**routine)
+
+        res = self.client.get('/routines/')
+        self.assertEqual(len(res.context['routines']), 3)
+
     def test_delete_routine(self):
         login_user(self.client)
         routine = Routine.objects.create()
-        self.client.post('/delete-routine/{}/'.format(routine.id), follow=True)
+        self.post_ajax('/delete-routine/', {'routine_id': routine.id})
         self.assertEqual(Routine.objects.count(), 0)
 
     def test_edit_routine(self):
         login_user(self.client)
         routine = Routine.objects.create()
-        self.client.post('/edit-routine/{}/'.format(routine.id), data={
+        self.client.post('/edit-routine/'.format(routine.id), data={
+            'routine_id': routine.id,
             'name': 'New Routine Name',
             'day': 'THURSDAY',
         }, follow=True)

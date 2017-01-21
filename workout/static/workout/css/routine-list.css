@@ -1,0 +1,79 @@
+.routines-wrapper{
+    width: 800px;
+}
+
+#routines-table{
+    width: 100%;
+    border-spacing: 0 5px;
+    border-collapse: separate;
+}
+
+.routine-row{
+    background-color: #7E7E7F;
+    border-spacing: 0 5px;
+    -webkit-box-shadow: 3px 3px 5px 0 rgba(0,0,0,0.61);
+    -moz-box-shadow: 3px 3px 5px 0 rgba(0,0,0,0.61);
+    box-shadow: 3px 3px 5px 0 rgba(0,0,0,0.61);
+    width: 100%;
+}
+
+.routine-row td{
+    display: block;
+}
+
+.routine-name{
+   color: #FFFFFF;
+}
+
+.routine-thead{
+   background-color: #7C7C7F;
+}
+
+.routine-thead td{
+    font-weight: bold;
+    font-size: 50px;
+    text-align: center;
+}
+
+.routine-info{
+    float: left;
+}
+
+.routine-settings{
+    float:right;
+}
+
+.routine-settings-btn{
+    width: 40px;
+    height: 40px;
+    display: block;
+}
+
+.delete-routine-btn{
+    background: url('/static/workout/images/delete-btn.png') no-repeat center;
+}
+
+.edit-routine-btn{
+    background: url('/static/workout/images/settings-btn.png') no-repeat center;
+}
+
+.add-row-large{
+    background: url('/static/workout/images/add-row.png') no-repeat center;
+    width: 80px;
+    height: 80px;
+    display: block;
+    object-fit: contain;
+    float: right;
+}
+
+.page-header h1{
+    display: inline;
+}
+
+#add-routine-popup{
+    display: none;
+}
+
+#edit-routine-popup{
+    display: none;
+}

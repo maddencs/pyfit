@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}Your Routines{% endblock %}
+
+{% block extra_head %}
+    <script src="{% static 'workout/js/routine-list.js' %}" type="text/javascript"></script>
+    <link href="{% static 'workout/css/routine-list.css' %}" rel="stylesheet" type="text/css" media="all">
+{% endblock %}
+
+
+{% block main_content %}
+    <div class="routines-wrapper">
+    <div class="page-header">
+        <h1>
+            Routines
+        </h1>
+        <a id="add-routine" href="#" class="add-row-large"></a>
+    </div>
+        <table id="routines-table">
+            <tbody id="routines-tbody">
+            {% if routines|length == 0 %}
+                <tr>
+                    <td>
+                        You don't have any routines yet.
+                    </td>
+                </tr>
+            {% else %}
+                {% for routine in routines %}
+                    {% include 'workout/routines/routine-row.html' %}
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include 'workout/routines/add-routine-popup.html' %}
+    {% include 'workout/routines/edit-routine-popup.html' %}
+{% endblock %}

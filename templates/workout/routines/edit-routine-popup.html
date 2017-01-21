@@ -1,0 +1,8 @@
+<div id="edit-routine-popup">
+    <form id="edit-routine-form" action="/edit-routine/">
+        <input id="edit-routine-id" type="hidden" name="routine_id">
+        {% csrf_token %}
+        {{ edit_routine_form.as_p }}
+        <input type="submit">
+    </form>
+</div>

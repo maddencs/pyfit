@@ -90,6 +90,9 @@ class LoginForm(AuthenticationForm):
         }
     )
 
+    def confirm_login_allowed(self, user):
+        pass
+
 
 class RoutineForm(CustomModelForm):
     day = forms.ChoiceField(choices=DAYS_OF_WEEK, required=False)

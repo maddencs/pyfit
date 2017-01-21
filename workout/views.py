@@ -39,6 +39,9 @@ class LoginView(FormView):
         login(self.request, user)
         return super(LoginView, self).form_valid(form)
 
+    def form_invalid(self, form):
+        return super(LoginView, self).form_invalid(form)
+
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     login_url = '/login/'
@@ -49,7 +52,7 @@ class AddRoutineView(FormView):
     form_class = RoutineForm
 
     def form_valid(self, form):
-        routine = self.request.user.userprofile.add_routine(**form.cleaned_data)
+        routine = self.request.user.user_profile.add_routine(**form.cleaned_data)
         return JsonResponse({
             'success': True,
             'routine_id': routine.id,
@@ -62,8 +65,19 @@ class AddRoutineView(FormView):
         })
 
 
+class RoutineListView(TemplateView):
+    template_name = 'workout/routines/routine-list.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs['routines'] = list(self.request.user.user_profile.routines.all())
+        kwargs['routines'].sort()
+        kwargs['add_routine_form'] = RoutineForm()
+        kwargs['edit_routine_form'] = RoutineForm()
+        return super(RoutineListView, self).get_context_data(**kwargs)
+
+
 class RoutineDetailView(TemplateView):
-    template_name = 'workout/routine-detail.html'
+    template_name = 'workout/routines/routine-detail.html'
 
     def get_context_data(self, **kwargs):
         kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
@@ -73,7 +87,7 @@ class RoutineDetailView(TemplateView):
 class DeleteRoutineView(View):
     def post(self, request, *args, **kwargs):
         try:
-            Routine.objects.get(pk=kwargs['routine_id']).delete()
+            Routine.objects.get(pk=request.POST.get('routine_id')).delete()
             return JsonResponse({
                 'success': True,
             })
@@ -89,7 +103,7 @@ class EditRoutineView(FormView):
 
     def form_valid(self, form):
         try:
-            routine = Routine.objects.get(pk=self.kwargs['routine_id'])
+            routine = Routine.objects.get(pk=self.request.POST.get('routine_id'))
             form.update(routine)
             return JsonResponse({
                 'success': True
@@ -109,7 +123,7 @@ class EditRoutineView(FormView):
 
 class AddExerciseView(FormView):
     form_class = ExerciseForm
-    template_name = 'workout/add-exercise.html'
+    template_name = 'workout/exercises/add-exercise.html'
 
     def get_success_url(self):
         return reverse_lazy('exercise_detail', kwargs={'exercise_id': self.kwargs['exercise'].id})
@@ -143,7 +157,7 @@ class AddExerciseView(FormView):
 
 
 class ExerciseDetailView(TemplateView):
-    template_name = 'workout/exercise-detail.html'
+    template_name = 'workout/exercises/exercise-detail.html'
 
 
 class EditExerciseView(FormView):
@@ -275,4 +289,3 @@ class ExerciseHistoryDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         kwargs['history'] = ExerciseHistory.objects.get(pk=kwargs['history_id'])
         return super(ExerciseHistoryDetailView, self).get_context_data(**kwargs)
-

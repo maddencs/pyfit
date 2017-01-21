@@ -23,7 +23,7 @@ class ModelMixin(object):
 
 
 class UserProfile(models.Model, ModelMixin):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, related_name='user_profile')
     user_type = models.CharField(max_length=30, choices=USER_TYPES, default='NORMAL')
 
     def __str__(self):
@@ -47,12 +47,21 @@ class Routine(models.Model, ModelMixin):
     def __unicode__(self):
         return 'Routine: {0} -- ID: {1}'.format(self.name, self.id)
 
+    def __lt__(self, other):
+        self_index = DAYS_OF_WEEK.index((self.day, self.get_day_display()))
+        other_index = DAYS_OF_WEEK.index((other.day, other.get_day_display()))
+        return self_index < other_index
+
+    def __eq__(self, other):
+        return self.day == other.day
+
     def add_exercise(self, **kwargs):
         return self.exercises.create(**kwargs)
 
 
 class Exercise(models.Model, ModelMixin):
     routine = models.ForeignKey(Routine, on_delete=models.CASCADE, related_name='exercises', blank=True, null=True)
+    priority = models.IntegerField(default=0)  # Order in which the exercise is performed
     exercise_type = models.CharField(max_length=30, choices=EXERCISE_TYPES, default='RESISTANCE')
     exercise_name = models.CharField(max_length=250, choices=EXERCISES, default='Custom Exercise')
     sets = ArrayField(models.IntegerField(default=10), size=10, default=list())
@@ -60,6 +69,12 @@ class Exercise(models.Model, ModelMixin):
 
     def __str__(self):
         return '{0} -- {1}'.format(self.get_exercise_type_display(), self.exercise_name)
+
+    def __lt__(self, other):
+        return self.priority < other.priority
+
+    def __eq__(self, other):
+        return self.priority == other.priority
 
     def add_history(self, **kwargs):
         if not kwargs.get('sets', None):

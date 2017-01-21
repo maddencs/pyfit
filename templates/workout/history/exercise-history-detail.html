@@ -7,16 +7,16 @@
         </div>
     {% with history.json as history_json %}
         <div id="set-details-wrapper">
-            <table>
-                <thead>
+            <table id="history-table">
+                <thead id="history-thead">
                     <tr>
                         <td class="exercise-history-column-header">Reps</td>
                         <td class="exercise-history-column-header">Weight(lbs)</td>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="history-set-tbody">
                 {% for set in history_json.sets %}
-                    <tr>
+                    <tr class="history-set-row">
                         <td>{{ set.reps }}</td>
                         <td>{{ set.weight }}</td>
                     </tr>

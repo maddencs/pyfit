@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 
 
 def create_user():
-    user = User.objects.create_user(
+    return User.objects.create_user(
         email='cory@madden.com',
         username='cory@madden.com',
         password='password',

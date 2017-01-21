@@ -1,5 +1,16 @@
 {% load staticfiles %}
+<html>
+    <head>
+        <title>{% block title %}PyFit{% endblock %}</title>
+
+        <script src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
+        {% block extra_head %}
+        {% endblock %}
+    </head>
+   <body>
+       {% block main_content %}
+       {% endblock %}
+   </body>
+</html>
 
 
-{% block main_content %}
-{% endblock %}

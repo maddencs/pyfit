@@ -100,17 +100,17 @@ class TestExercises(TestCase, TestMixin):
         })
         routine.refresh_from_db()
         self.assertEqual(routine.exercises.count(), 1)
-        exercise = Exercise.objects.get(pk=res.json()['exercise_id'])
+        exercise = Exercise.objects.get(pk=res.json()['pk'])
         self.assertEqual(len(exercise.sets), 4)
         self.assertEqual(exercise.get_name_display(), 'Bench Press')
 
     def test_edit_exercise(self):
         exercise = Exercise.objects.create()
-        res = self.client.post('/edit-exercise/', data={
+        res = self.post_ajax('/edit-exercise/', data={
             'exercise_id': exercise.id,
             'sets': '8, 8, 8',
             'rest_duration': 90,
-        }, follow=True)
+        })
         exercise.refresh_from_db()
         self.assertEqual(len(exercise.sets), 3)
         self.assertEqual(exercise.name, 'Custom Exercise')

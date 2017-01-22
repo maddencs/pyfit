@@ -41,7 +41,7 @@ function deleteExercise(e){
 		},
 		success: function(data){
 			if(data.success){
-				location.reload();
+				window.location.reload();
 			} else{
 				var reason = 'There was a problem deleting the exercise.';
 				switch(data.reason){

@@ -52,7 +52,7 @@ function deleteRoutine(e){
 $(document).ready(function(){
 	csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
 	
-	$('.routine-row, .routine-info').click(function(e){
+	$('.common-info').click(function(e){
 		var routineId = $(e.target).closest('tr').data('routine-id');
 		window.location = '/routine/' + routineId + '/';
 	})

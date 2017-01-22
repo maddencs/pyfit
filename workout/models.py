@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.urls import reverse
 
 from .constants import DAYS_OF_WEEK, USER_TYPES, EXERCISE_TYPES, EXERCISES
 
@@ -55,6 +56,9 @@ class Routine(models.Model, ModelMixin):
     def __eq__(self, other):
         return self.day == other.day
 
+    def get_absolute_url(self):
+        return reverse('routine_detail', kwargs={'routine_id': self.id})
+
     def add_exercise(self, **kwargs):
         return self.exercises.create(**kwargs)
 
@@ -75,6 +79,9 @@ class Exercise(models.Model, ModelMixin):
 
     def __eq__(self, other):
         return self.priority == other.priority
+
+    def get_absolute_url(self):
+        return reverse('exercise_detail', kwargs={'exercise_id': self.id})
 
     def add_history(self, **kwargs):
         if not kwargs.get('sets', None):
@@ -114,4 +121,5 @@ class ExerciseHistory(models.Model, ModelMixin):
             }, tuple(zip(self.sets, self.weights_per_set))))
         }
 
-
+    def get_absolute_url(self):
+        return reverse('exercise_history_detail', kwargs={'history_id': self.id})

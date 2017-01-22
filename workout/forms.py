@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.postgres.forms import SimpleArrayField
 
 from .constants import DAYS_OF_WEEK
+from .models import Routine, Exercise, ExerciseHistory
 
 
 def clean_cleaned_data(data):
@@ -11,14 +12,10 @@ def clean_cleaned_data(data):
     return {k: v for k, v in data.items() if v is not ''}
 
 
-class CustomModelForm(forms.Form):
+class CustomModelForm(forms.ModelForm):
     def clean(self):
         data = super(CustomModelForm, self).clean()
         return clean_cleaned_data(data)
-
-    def update(self, instance):
-        instance.update(**self.cleaned_data)
-        return True
 
 
 class RegistrationForm(forms.Form):
@@ -98,6 +95,10 @@ class RoutineForm(CustomModelForm):
     day = forms.ChoiceField(choices=DAYS_OF_WEEK, required=False)
     name = forms.CharField(max_length=250, required=False)
 
+    class Meta:
+        model = Routine
+        fields = ['day', 'name']
+
 
 class ExerciseForm(CustomModelForm):
     sets = SimpleArrayField(forms.IntegerField(), required=False)
@@ -105,7 +106,15 @@ class ExerciseForm(CustomModelForm):
     name = forms.CharField(max_length=250, required=False)
     exercise_type = forms.CharField(max_length=250, required=False)
 
+    class Meta:
+        model = Exercise
+        fields = ['sets', 'rest_duration', 'name', 'exercise_type']
+
 
 class ExerciseHistoryForm(CustomModelForm):
     sets = SimpleArrayField(forms.IntegerField(), required=False)
     weights_per_set = SimpleArrayField(forms.IntegerField(), required=False)
+
+    class Meta:
+        model = ExerciseHistory
+        fields = ['sets', 'weights_per_set']

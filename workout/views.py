@@ -5,7 +5,7 @@ from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
 from django.http import JsonResponse
 from django.utils import timezone
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 from django.views.generic.edit import FormView, View
 
 from .forms import (RegistrationForm,
@@ -15,6 +15,32 @@ from .forms import (RegistrationForm,
                     ExerciseHistoryForm,
                     )
 from .models import Routine, Exercise, ExerciseHistory
+
+
+class AjaxableResponseMixin(object):
+    """
+    Mixin to add AJAX support to a form.
+    Must be used with an object-based FormView (e.g. CreateView)
+    """
+    def form_invalid(self, form):
+        response = super(AjaxableResponseMixin, self).form_invalid(form)
+        if self.request.is_ajax():
+            return JsonResponse(form.errors, status=400)
+        else:
+            return response
+
+    def form_valid(self, form):
+        # We make sure to call the parent's form_valid() method because
+        # it might do some processing (in the case of CreateView, it will
+        # call form.save() for example).
+        response = super(AjaxableResponseMixin, self).form_valid(form)
+        if self.request.is_ajax():
+            data = {
+                'pk': self.object.pk,
+            }
+            return JsonResponse(data)
+        else:
+            return response
 
 
 class SignupView(FormView):
@@ -48,21 +74,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard.html'
 
 
-class AddRoutineView(FormView):
+class AddRoutineView(AjaxableResponseMixin, CreateView):
+    model = Routine
     form_class = RoutineForm
 
     def form_valid(self, form):
-        routine = self.request.user.user_profile.add_routine(**form.cleaned_data)
-        return JsonResponse({
-            'success': True,
-            'routine_id': routine.id,
-        })
-
-    def form_invalid(self, form):
-        return JsonResponse({
-            'success': False,
-            'errors': form.errors,
-        })
+        form.instance.user_id = self.request.user.user_profile.id
+        return super(AddRoutineView, self).form_valid(form)
 
 
 class RoutineListView(TemplateView):
@@ -77,7 +95,7 @@ class RoutineListView(TemplateView):
 
 
 class RoutineDetailView(TemplateView):
-    template_name = 'workout//exercises/routine-exercise-list.html'
+    template_name = 'workout/exercises/routine-exercise-list.html'
 
     def get_context_data(self, **kwargs):
         kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
@@ -88,85 +106,52 @@ class RoutineDetailView(TemplateView):
         return super(RoutineDetailView, self).get_context_data(**kwargs)
 
 
-class DeleteRoutineView(View):
-    def post(self, request, *args, **kwargs):
-        try:
-            Routine.objects.get(pk=request.POST.get('routine_id')).delete()
-            return JsonResponse({
-                'success': True,
-            })
-        except exceptions.ObjectDoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'reason': 'ROUTINE_DNE'  # Routine matching primary key does not exist
-            })
+class DeleteRoutineView(AjaxableResponseMixin, DeleteView):
+    model = Routine
+    success_url = reverse_lazy('routine_list')
+
+    def get_object(self, queryset=None):
+        return Routine.objects.get(pk=self.request.POST['routine_id'])
 
 
-class EditRoutineView(FormView):
+class EditRoutineView(AjaxableResponseMixin, UpdateView):
     form_class = RoutineForm
+    model = Routine
 
-    def form_valid(self, form):
-        try:
-            routine = Routine.objects.get(pk=self.request.POST.get('routine_id'))
-            form.update(routine)
-            return JsonResponse({
-                'success': True
-            })
-        except exceptions.ObjectDoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'reason': 'ROUTINE_DNE'  # Routine matching primary key does not exist
-            })
-
-    def form_invalid(self, form):
-        return JsonResponse({
-            'success': False,
-            'reason': form.errors,
-        })
+    def get_object(self):
+        return Routine.objects.get(pk=self.request.POST.get('routine_id'))
 
 
-class AddExerciseView(FormView):
+class AddExerciseView(AjaxableResponseMixin, CreateView):
     form_class = ExerciseForm
+    model = Exercise
     template_name = 'workout/exercises/add-exercise.html'
 
-    def get_success_url(self):
-        return reverse_lazy('exercise_detail', kwargs={'exercise_id': self.kwargs['exercise'].id})
-
-    # def get_context_data(self, **kwargs):
-    #     kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
-    #     return super(AddExerciseView, self).get_context_data(**kwargs)
-
     def form_valid(self, form):
-        try:
-            exercise = Routine.objects.get(pk=self.request.POST['routine_id']).add_exercise(**form.cleaned_data)
-            if self.request.is_ajax():
-                return JsonResponse({
-                    'success': True,
-                    'exercise_id': exercise.id,
-                })
-            else:
-                self.kwargs['exercise'] = exercise
-                return super(AddExerciseView, self).form_valid(form)
-        except exceptions.ObjectDoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'reason': 'ROUTINE_DNE'
-            })
-
-    def form_invalid(self, form):
-        return JsonResponse({
-            'success': False,
-            'reason': form.errors,
-        })
+        form.instance.routine_id = self.request.POST['routine_id']
+        return super(AddExerciseView, self).form_valid(form)
 
 
-class DeleteExerciseView(View):
+class DeleteExerciseView(AjaxableResponseMixin, View):
+    model = Exercise
+
+    def get_success_url(self):
+        return reverse_lazy('routine_detail', kwargs={'routine_id': self.routine_id})
+
+    def get_object(self):
+        exercise = Exercise.objects.get(pk=self.request.POST['exercise_id'])
+        self.routine_id = exercise.routine_id
+        return exercise
+
     def post(self, request, *args, **kwargs):
         try:
-            Exercise.objects.get(pk=request.POST.get('exercise_id')).delete()
-            return JsonResponse({
-                'success': True,
-            })
+            self.get_object().delete()
+            if request.is_ajax():
+                return JsonResponse({
+                    'success': True,
+                })
+            else:
+                return self.get_success_url()
         except exceptions.ObjectDoesNotExist:
             return JsonResponse({
                 'success': False,
@@ -178,68 +163,30 @@ class ExerciseDetailView(TemplateView):
     template_name = 'workout/exercises/exercise-detail.html'
 
 
-class EditExerciseView(FormView):
+class EditExerciseView(AjaxableResponseMixin, UpdateView):
     form_class = ExerciseForm
+    model = Exercise
 
-    def form_valid(self, form):
-        exercise = Exercise.objects.get(pk=self.request.POST['exercise_id'])
-        form.update(exercise)
-        return JsonResponse({
-            'success': True,
-        })
-
-    def form_invalid(self, form):
-        return JsonResponse({
-            'success': False,
-            'reason': form.errors,
-        })
+    def get_object(self):
+        return Exercise.objects.get(pk=self.request.POST['exercise_id'])
 
 
-class AddExerciseHistoryView(FormView):
+class AddExerciseHistoryView(AjaxableResponseMixin, CreateView):
+    model = ExerciseHistory
     form_class = ExerciseHistoryForm
     template_name = 'workout/history/add-exercise-history.html'
 
-    def get_success_url(self):
-        return reverse_lazy('exercise_history_detail', kwargs={'history_id': self.kwargs['history'].id})
-
     def form_valid(self, form):
-        exercise = Exercise.objects.get(pk=self.kwargs['exercise_id'])
-        history = exercise.add_history(**form.cleaned_data)
-        if self.request.is_ajax():
-            return JsonResponse({
-                'success': True,
-                'history_id': history.id,
-            })
-        else:
-            self.kwargs['history'] = history
-            return super(AddExerciseHistoryView, self).form_valid(form)
-
-    def form_invalid(self, form):
-        if self.request.is_ajax():
-            return JsonResponse({
-                'success': False,
-                'reason': form.errors,
-            })
-        else:
-            return super(AddExerciseHistoryView, self).form_invalid(form)
+        form.instance.exercise_id = self.kwargs['exercise_id']
+        return super(AddExerciseHistoryView, self).form_valid(form)
 
 
-class EditExerciseHistoryView(FormView):
+class EditExerciseHistoryView(AjaxableResponseMixin, UpdateView):
     form_class = ExerciseHistoryForm
+    model = ExerciseHistory
 
-    def form_valid(self, form):
-        history = ExerciseHistory.objects.get(pk=self.kwargs['history_id'])
-        form.update(history)
-        return JsonResponse({
-            'success': True,
-            'history_id': history.id,
-        })
-
-    def form_invalid(self, form):
-        return JsonResponse({
-            'success': False,
-            'reason': form.errors,
-        })
+    def get_object(self):
+        return ExerciseHistory.objects.get(pk=self.kwargs['history_id'])
 
 
 class DeleteExerciseHistoryView(View):

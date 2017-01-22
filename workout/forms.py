@@ -102,7 +102,7 @@ class RoutineForm(CustomModelForm):
 class ExerciseForm(CustomModelForm):
     sets = SimpleArrayField(forms.IntegerField(), required=False)
     rest_duration = forms.IntegerField(initial=60, required=False)
-    exercise_name = forms.CharField(max_length=250, required=False)
+    name = forms.CharField(max_length=250, required=False)
     exercise_type = forms.CharField(max_length=250, required=False)
 
 

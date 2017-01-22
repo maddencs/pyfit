@@ -1,0 +1,8 @@
+<div id="add-exercise-popup" class="common-row-popup">
+    <form id="add-exercise-form">
+        <input type="hidden" name="routine_id" value="{{ routine.id }}">
+        {% csrf_token %}
+        {{ add_exercise_form.as_p }}
+        <input type="submit">
+    </form>
+</div>

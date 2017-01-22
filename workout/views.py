@@ -77,10 +77,14 @@ class RoutineListView(TemplateView):
 
 
 class RoutineDetailView(TemplateView):
-    template_name = 'workout/routines/routine-detail.html'
+    template_name = 'workout//exercises/routine-exercise-list.html'
 
     def get_context_data(self, **kwargs):
         kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
+        kwargs['exercises'] = list(kwargs['routine'].exercises.all())
+        kwargs['exercises'].sort()
+        kwargs['edit_exercise_form'] = ExerciseForm()
+        kwargs['add_exercise_form'] = ExerciseForm()
         return super(RoutineDetailView, self).get_context_data(**kwargs)
 
 
@@ -128,13 +132,13 @@ class AddExerciseView(FormView):
     def get_success_url(self):
         return reverse_lazy('exercise_detail', kwargs={'exercise_id': self.kwargs['exercise'].id})
 
-    def get_context_data(self, **kwargs):
-        kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
-        return super(AddExerciseView, self).get_context_data(**kwargs)
+    # def get_context_data(self, **kwargs):
+    #     kwargs['routine'] = Routine.objects.get(pk=self.kwargs['routine_id'])
+    #     return super(AddExerciseView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
         try:
-            exercise = Routine.objects.get(pk=self.kwargs['routine_id']).add_exercise(**form.cleaned_data)
+            exercise = Routine.objects.get(pk=self.request.POST['routine_id']).add_exercise(**form.cleaned_data)
             if self.request.is_ajax():
                 return JsonResponse({
                     'success': True,
@@ -156,6 +160,20 @@ class AddExerciseView(FormView):
         })
 
 
+class DeleteExerciseView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            Exercise.objects.get(pk=request.POST.get('exercise_id')).delete()
+            return JsonResponse({
+                'success': True,
+            })
+        except exceptions.ObjectDoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'reason': 'EXERCISE_DNE',
+            })
+
+
 class ExerciseDetailView(TemplateView):
     template_name = 'workout/exercises/exercise-detail.html'
 
@@ -164,7 +182,7 @@ class EditExerciseView(FormView):
     form_class = ExerciseForm
 
     def form_valid(self, form):
-        exercise = Exercise.objects.get(pk=self.kwargs['exercise_id'])
+        exercise = Exercise.objects.get(pk=self.request.POST['exercise_id'])
         form.update(exercise)
         return JsonResponse({
             'success': True,

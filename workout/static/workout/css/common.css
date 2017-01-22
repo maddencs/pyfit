@@ -1,0 +1,92 @@
+.common-wrapper{
+    width: 800px;
+}
+
+#common-table{
+    width: 100%;
+    border-spacing: 0 5px;
+    border-collapse: separate;
+}
+.common-row{
+    background-color: #7E7E7F;
+    border-spacing: 0 5px;
+    -webkit-box-shadow: 3px 3px 5px 0 rgba(0,0,0,0.61);
+    -moz-box-shadow: 3px 3px 5px 0 rgba(0,0,0,0.61);
+    box-shadow: 3px 3px 5px 0 rgba(0,0,0,0.61);
+    width: 100%;
+}
+
+.common-row td{
+    display: inline;
+}
+
+.row-info{
+    float: left;
+}
+
+.row-options{
+    float:right;
+}
+
+.row-settings-btn{
+    width: 40px;
+    height: 40px;
+    display: block;
+}
+
+.common-delete-btn{
+    background: url('/static/workout/images/delete-btn.png') no-repeat center;
+}
+
+.common-edit-btn{
+    background: url('/static/workout/images/settings-btn.png') no-repeat center;
+}
+
+.common-row-name{
+    display: inline;
+}
+
+.common-thead{
+    background-color: #7C7C7F;
+}
+
+.common-thead td{
+    font-weight: bold;
+    font-size: 50px;
+    text-align: center;
+}
+
+.common-info{
+    float: left;
+}
+
+.common-info *{
+    display: block;
+}
+
+.common-settings{
+    float:right;
+}
+
+.common-settings-btn{
+    width: 40px;
+    height: 40px;
+    display: block;
+}
+
+.add-row-large{
+    background: url('/static/workout/images/add-row.png') no-repeat center;
+    width: 80px;
+    height: 80px;
+    display: block;
+    object-fit: contain;
+    float: right;
+}
+
+.page-header h1{
+    display: inline;
+}
+
+.common-row-popup{
+    display: none;
+}

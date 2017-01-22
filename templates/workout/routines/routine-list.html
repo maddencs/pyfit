@@ -6,19 +6,19 @@
 
 {% block extra_head %}
     <script src="{% static 'workout/js/routine-list.js' %}" type="text/javascript"></script>
-    <link href="{% static 'workout/css/routine-list.css' %}" rel="stylesheet" type="text/css" media="all">
+    <link href="{% static 'workout/css/common.css' %}" rel="stylesheet" type="text/css" media="all">
 {% endblock %}
 
 
 {% block main_content %}
-    <div class="routines-wrapper">
-    <div class="page-header">
-        <h1>
-            Routines
-        </h1>
-        <a id="add-routine" href="#" class="add-row-large"></a>
-    </div>
-        <table id="routines-table">
+    <div class="common-wrapper">
+        <div class="page-header">
+            <h1>
+                Routines
+            </h1>
+            <a id="add-routine" href="#" class="add-row-large"></a>
+        </div>
+        <table id="common-table">
             <tbody id="routines-tbody">
             {% if routines|length == 0 %}
                 <tr>

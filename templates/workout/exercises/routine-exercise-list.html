@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Routine: {{ routine.name }}{% endblock %}
+
+{% block extra_head %}
+    <script src="{% static 'workout/js/routine-exercise-list.js' %}" type="text/javascript"></script>
+    <link href="{% static 'workout/css/common.css' %}" rel="stylesheet" type="text/css" media="all">
+{% endblock %}
+
+
+{% block main_content %}
+    <div class="common-wrapper">
+        <div class="page-header">
+            <h1>
+                {{ routine.name }}
+            </h1>
+            <a id="add-exercise" href="#" class="add-row-large"></a>
+        </div>
+        <table id="common-table">
+            <tbody id="exercise-tbody">
+            {% if exercises|length == 0 %}
+                <tr>
+                    <td>You don't currently have any exercises.</td>
+                </tr>
+            {% else %}
+                {% for exercise in exercises %}
+                    <tr data-exercise-id="{{ exercise.id }}" class="common-row exercise-row">
+                        <td class="common-info">
+                            <h3 class="common-row-name">{{ exercise.name }}</h3>
+                        </td>
+                        <td>
+                            <div data-exercise-id="{{ exercise.id }}" class="common-settings">
+                                <a data-exercise-id="{{ exercise.id }}" class="common-edit-btn common-settings-btn edit-exercise-btn"></a>
+                                <a data-exercise-id="{{ exercise.id }}" class="common-delete-btn common-settings-btn delete-exercise-btn"></a>
+                                <a class="exercise-logs-btn common-settings-btn exercise-logs-btn"></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% include 'workout/exercises/edit-exercise-popup.html' %}
+    {% include 'workout/exercises/add-exercise-popup.html' %}
+{% endblock %}

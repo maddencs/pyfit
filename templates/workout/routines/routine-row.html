@@ -1,15 +1,15 @@
-<tr data-routine-id="{{ routine.id }}" class="routine-row">
+<tr data-routine-id="{{ routine.id }}" class="common-row routine-row">
     <td>
-        <div class="routine-info">
-            <h2 class="routine-name">{{ routine.name }}</h2>
+        <div class="common-info">
+            <h2 class="common-row-name">{{ routine.name }}</h2>
             <span class="routine-day">{{ routine.get_day_display }}</span>
         </div>
-        <div class="routine-settings">
+        <div class="common-settings">
             <div>
-                <a data-routine-id="{{ routine.id }}" class="routine-settings-btn edit-routine-btn" href="#" aria-hidden="true"></a>
+                <a data-routine-id="{{ routine.id }}" class="common-settings-btn common-edit-btn edit-routine-btn" href="#" aria-hidden="true"></a>
             </div>
             <div>
-                <a data-routine-id="{{ routine.id }}" class="routine-settings-btn delete-routine-btn" href="#" aria-hidden="true"></a>
+                <a data-routine-id="{{ routine.id }}" class="common-settings-btn common-delete-btn delete-routine-btn" href="#" aria-hidden="true"></a>
             </div>
         </div>
     </td>
